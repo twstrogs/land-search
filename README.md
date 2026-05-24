@@ -62,8 +62,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/land-search-v2.git
-cd land-search-v2
+git clone https://github.com/yourusername/land-search.git
+cd land-search
 
 # 2. Install dependencies
 composer install
