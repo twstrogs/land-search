@@ -11,7 +11,7 @@
 
 ## Preview
 
-![Homepage](docs/images/homepage.png)
+![Homepage](storage/homepage.png)
 
 ---
 
