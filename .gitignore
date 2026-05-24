@@ -1,0 +1,48 @@
+# Laravel
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+npm-debug.log
+yarn-error.log
+*.log
+
+# IDE & Editors
+/.fleet
+/.idea
+/.vscode
+
+# Local folders
+/twstrogs
+
+# Storage - ignore contents but keep structure
+/storage/app/public/posts/*
+/storage/app/public/logs/*
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Keep .gitkeep files in storage directories
+!/storage/app/public/posts/.gitkeep
+!/storage/app/public/logs/.gitkeep
+!/storage/logs/.gitkeep
+!/storage/framework/cache/.gitkeep
+!/storage/framework/sessions/.gitkeep
+!/storage/framework/testing/.gitkeep
+!/storage/framework/views/.gitkeep
