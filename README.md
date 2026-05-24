@@ -62,7 +62,7 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/land-search.git
+git clone https://github.com/twstrogs/land-search.git
 cd land-search
 
 # 2. Install dependencies
