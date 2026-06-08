@@ -9,6 +9,7 @@ use App\Models\ScrapeLog;
 use App\Models\ExtractionLog;
 use App\Models\PostEmbedding;
 use App\Services\AI\AiServiceFactory;
+use App\Services\CloudinaryService;
 use App\Services\FeatureExtractionService;
 use App\Services\ImageDownloaderService;
 use App\Services\NormalizeService;
@@ -37,7 +38,8 @@ class ProcessSourceRecordJob implements ShouldQueue
     public function handle(
         NormalizeService $normalizeService,
         ImageDownloaderService $imageDownloader,
-        FeatureExtractionService $featureService
+        FeatureExtractionService $featureService,
+        CloudinaryService $cloudinaryService
     ): void {
         // Support both Apify format (text) and normalized format (raw_content)
         $rawContent = $this->data['raw_content']
@@ -99,14 +101,27 @@ class ProcessSourceRecordJob implements ShouldQueue
                 }
             }
 
-            // Download and store images locally
+            // Download and store images locally, then upload to Cloudinary
+            $cloudinaryUrls = [];
             $localImagePaths = [];
             if (!empty($imageUrls)) {
                 $localImagePaths = $imageDownloader->downloadImages($imageUrls);
-                Log::debug("Downloaded images for post", [
+
+                // Upload local images to Cloudinary
+                if (!empty($localImagePaths)) {
+                    $cloudinaryUrls = $cloudinaryService->uploadMultipleFromPaths($localImagePaths);
+
+                    // Delete local files after successful upload to Cloudinary
+                    foreach ($localImagePaths as $localPath) {
+                        $imageDownloader->deleteImage($localPath);
+                    }
+                }
+
+                Log::debug("Downloaded and uploaded images for post", [
                     'source_record_id' => $sourceRecord->id,
                     'urls_count' => count($imageUrls),
                     'downloaded_count' => count($localImagePaths),
+                    'cloudinary_count' => count($cloudinaryUrls),
                 ]);
             }
 
@@ -148,9 +163,9 @@ class ProcessSourceRecordJob implements ShouldQueue
                 ?? $this->data['user']['name']
                 ?? null;
 
-            // Store local paths for images (not Facebook URLs)
-            $normalized['images'] = $localImagePaths;
-            $normalized['image_url'] = $localImagePaths[0] ?? null;
+            // Store Cloudinary URLs for images (instead of local paths)
+            $normalized['images'] = $cloudinaryUrls;
+            $normalized['image_url'] = $cloudinaryUrls[0] ?? null;
 
             $normalized['facebook_url'] = $this->data['facebook_url']
                 ?? $this->data['url']
@@ -221,7 +236,7 @@ class ProcessSourceRecordJob implements ShouldQueue
             Log::info("Processed source record", [
                 'post_id' => $post->id,
                 'extraction_log_id' => $extractionLog->id,
-                'images_downloaded' => count($localImagePaths),
+                'images_uploaded_to_cloudinary' => count($cloudinaryUrls),
                 'phones_found' => count($extracted['phones'] ?? []),
                 'features_found' => count($normalizedFeatures),
             ]);
